@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pratibha Surya Connect — Go Solar, Save From Day One</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink-night:#12203D;
+    --ink-night-2:#0C1730;
+    --marigold:#F2B705;
+    --marigold-soft:#FFDD7A;
+    --rust:#AE3A2C;
+    --paper:#FAF7F0;
+    --paper-2:#F1ECE0;
+    --leaf:#2E6B4F;
+    --ink:#1B1B18;
+    --ink-soft:#5C5A52;
+    --line: rgba(20,20,15,0.12);
+  }
+  /* ---------- WELCOME ANIMATION ---------- */
+  .welcome-overlay{
+    position:fixed; inset:0; z-index:999;
+    background: radial-gradient(ellipse at 50% 105%, #1C3A66 0%, var(--ink-night) 45%, var(--ink-night-2) 100%);
+    overflow:hidden;
+    display:flex; align-items:center; justify-content:center;
+    transition: opacity 0.7s ease, visibility 0.7s ease;
+  }
+  .welcome-overlay.hide{opacity:0; visibility:hidden; pointer-events:none;}
+  .welcome-rays{
+    position:absolute; inset:0;
+    background: repeating-conic-gradient(from 0deg at 50% 78%,
+      rgba(242,183,5,0.16) 0deg 5deg, transparent 5deg 14deg);
+    mask-image: radial-gradient(ellipse at 50% 78%, black 0%, black 35%, transparent 68%);
+    animation: rayRotate 12s linear infinite;
+  }
+  @keyframes rayRotate{ from{ transform:rotate(0deg);} to{ transform:rotate(360deg);} }
+  .welcome-sun{
+    position:absolute; left:50%; bottom:38%;
+    width:120px; height:120px; border-radius:50%;
+    background: radial-gradient(circle at 35% 30%, var(--marigold-soft), var(--marigold) 55%, var(--rust) 130%);
+    box-shadow: 0 0 70px 18px rgba(242,183,5,0.45);
+    transform: translate(-50%, 160px); opacity:0;
+    animation: sunrise 2s cubic-bezier(.2,.7,.3,1) forwards 0.2s;
+  }
+  @keyframes sunrise{
+    to{ transform: translate(-50%, 0); opacity:1; }
+  }
+  .welcome-panels{
+    position:absolute; left:50%; bottom:14%; transform:translateX(-50%);
+    opacity:0;
+    animation: panelsFadeIn 1s ease forwards 1.3s;
+  }
+  @keyframes panelsFadeIn{ to{ opacity:1; } }
+  .panel-row{
+    display:flex; gap:4px;
+    background: rgba(18,32,61,0.55);
+    border:1px solid rgba(242,183,5,0.4);
+    border-radius:6px;
+    padding:6px;
+  }
+  .panel-cell{
+    width:34px; height:24px;
+    background: linear-gradient(135deg, #1e3a68, #12203D);
+    border:1px solid rgba(242,183,5,0.35);
+    border-radius:2px;
+  }
+  .welcome-text{
+    position:absolute; left:50%; bottom:6%; transform:translate(-50%, 10px);
+    text-align:center; color:var(--paper); opacity:0;
+    animation: textFadeUp 0.9s ease forwards 1.7s;
+    max-width:88%; padding:0 20px;
+  }
+  @keyframes textFadeUp{ to{ opacity:1; transform:translate(-50%, 0);} }
+  .welcome-brand{font-family:'Fraunces', serif; font-weight:700; font-size:22px; margin-bottom:6px;}
+  .welcome-tagline{font-size:13.5px; color:rgba(250,247,240,0.75);}
+  @media (max-width:520px){
+    .welcome-sun{width:90px; height:90px;}
+    .panel-cell{width:26px; height:19px;}
+  }
+
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Manrope', sans-serif;
+    line-height:1.5;
+    cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32"><text y="24" font-size="26">%F0%9F%8C%9E</text></svg>') 16 16, auto;
+  }
+  a, button, input[type=range]{
+    cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32"><text y="24" font-size="26">%F0%9F%8C%9E</text></svg>') 16 16, pointer;
+  }
+  h1,h2,h3, .display{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    letter-spacing:-0.01em;
+  }
+  .mono{
+    font-family:'JetBrains Mono', monospace;
+  }
+  a{color:inherit;}
+  .wrap{max-width:1080px; margin:0 auto; padding:0 24px;}
+
+  /* ---------- NAV ---------- */
+  nav{
+    position:sticky; top:0; z-index:50;
+    background:rgba(18,32,61,0.92);
+    backdrop-filter: blur(6px);
+    color:var(--paper);
+  }
+  nav .wrap{display:flex; align-items:center; justify-content:space-between; padding-top:16px; padding-bottom:16px;}
+  .brand{display:flex; align-items:center; gap:10px; font-family:'Fraunces', serif; font-weight:700; font-size:20px;}
+  .brand-mark{
+    width:22px; height:22px; border-radius:50%;
+    background: radial-gradient(circle at 35% 30%, var(--marigold-soft), var(--marigold) 60%, var(--rust) 130%);
+    flex-shrink:0;
+  }
+  nav .links{display:flex; gap:28px; font-size:14px; font-weight:600;}
+  nav .links a{text-decoration:none; opacity:0.85; transition:opacity .2s;}
+  nav .links a:hover{opacity:1;}
+  .nav-cta{
+    background:var(--marigold); color:var(--ink-night); padding:9px 18px; border-radius:999px;
+    font-weight:700; font-size:13.5px; text-decoration:none; white-space:nowrap;
+  }
+
+  /* ---------- HERO ---------- */
+  .hero{
+    position:relative;
+    background: radial-gradient(ellipse at 50% -10%, #1C3A66 0%, var(--ink-night) 55%, var(--ink-night-2) 100%);
+    color:var(--paper);
+    overflow:hidden;
+    padding: 88px 0 96px;
+  }
+  .rays{
+    position:absolute; inset:0;
+    background: repeating-conic-gradient(from 0deg at 50% -18%,
+      rgba(242,183,5,0.14) 0deg 5deg,
+      transparent 5deg 14deg);
+    mask-image: radial-gradient(ellipse at 50% -18%, black 0%, black 40%, transparent 72%);
+    pointer-events:none;
+  }
+  .hero .wrap{position:relative; z-index:2;}
+  .eyebrow{
+    display:inline-flex; align-items:center; gap:8px;
+    font-size:12.5px; letter-spacing:0.08em; text-transform:uppercase;
+    color:var(--marigold-soft); font-weight:700; margin-bottom:22px;
+  }
+  .eyebrow::before{content:""; width:7px; height:7px; border-radius:50%; background:var(--marigold);}
+  .hero h1{
+    font-size:clamp(34px, 5.4vw, 60px);
+    line-height:1.05;
+    max-width:16ch;
+    margin:0 0 20px;
+  }
+  .hero h1 em{color:var(--marigold); font-style:normal;}
+  .hero p.lede{
+    font-size:17px; max-width:46ch; color:rgba(250,247,240,0.82); margin:0 0 36px;
+  }
+  .hero-cta-row{display:flex; flex-wrap:wrap; gap:14px; margin-bottom:56px;}
+  .btn{
+    display:inline-flex; align-items:center; gap:10px;
+    padding:14px 24px; border-radius:999px; font-weight:700; font-size:15px;
+    text-decoration:none; border:1px solid transparent; cursor:pointer;
+  }
+  .btn-primary{background:var(--marigold); color:var(--ink-night);}
+  .btn-primary:hover{background:var(--marigold-soft);}
+  .btn-ghost{background:transparent; color:var(--paper); border-color:rgba(250,247,240,0.35);}
+  .btn-ghost:hover{border-color:rgba(250,247,240,0.7);}
+
+  /* meter / signature element */
+  .meter{
+    display:inline-flex; flex-direction:column; gap:6px;
+    background:var(--ink-night-2);
+    border:1px solid rgba(242,183,5,0.35);
+    border-radius:14px;
+    padding:20px 26px;
+  }
+  .meter .label{font-size:11.5px; letter-spacing:0.09em; text-transform:uppercase; color:rgba(250,247,240,0.55); font-weight:600;}
+  .meter .value{
+    font-size:clamp(28px, 4vw, 40px); color:var(--marigold-soft); font-weight:500;
+    font-variant-numeric: tabular-nums;
+  }
+  .meter .sub{font-size:12.5px; color:rgba(250,247,240,0.5);}
+
+  /* ---------- SECTION GENERIC ---------- */
+  section{padding:76px 0;}
+  .section-head{max-width:56ch; margin-bottom:44px;}
+  .section-head .eyebrow-light{font-size:12.5px; letter-spacing:0.08em; text-transform:uppercase; color:var(--rust); font-weight:700; margin-bottom:12px; display:block;}
+  .section-head h2{font-size:clamp(26px,3.4vw,38px); margin:0 0 14px;}
+  .section-head p{color:var(--ink-soft); font-size:16px; margin:0;}
+
+  /* why-now grid */
+  .why-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:1px; background:var(--line); border:1px solid var(--line); border-radius:16px; overflow:hidden;}
+  .why-card{background:var(--paper); padding:28px 26px;}
+  .why-card .num{font-family:'JetBrains Mono',monospace; font-size:13px; color:var(--rust); font-weight:700; margin-bottom:14px;}
+  .why-card h3{font-size:18px; margin:0 0 8px; font-weight:600;}
+  .why-card p{color:var(--ink-soft); font-size:14.5px; margin:0;}
+
+  /* pricing tables */
+  .price-table-heading{font-size:18px; font-weight:700; margin:0 0 4px; font-family:'Fraunces',serif;}
+  .table-sub{font-size:13.5px; color:var(--ink-soft); font-weight:700; text-transform:uppercase; letter-spacing:0.04em; margin:0 0 12px;}
+  .table-scroll{overflow-x:auto; border:1px solid var(--line); border-radius:14px;}
+  table.price-table{
+    width:100%; border-collapse:collapse; background:var(--paper); font-size:14.5px; min-width:520px;
+  }
+  table.price-table th{
+    background:var(--ink-night); color:var(--paper);
+    text-align:left; padding:13px 18px; font-size:12.5px; letter-spacing:0.04em; text-transform:uppercase; font-weight:700;
+  }
+  table.price-table td{
+    padding:14px 18px; border-top:1px solid var(--line); color:var(--ink);
+  }
+  table.price-table tr:nth-child(even) td{background:var(--paper-2);}
+  table.price-table td.num, table.price-table th.num{font-family:'JetBrains Mono',monospace; white-space:nowrap;}
+  table.price-table td.net{color:var(--leaf); font-weight:700; font-family:'JetBrains Mono',monospace;}
+  table.price-table td.config{font-size:13px; color:var(--ink-soft); line-height:1.45;}
+
+  /* kW selector bar */
+  .kw-selector{
+    background: var(--ink-night-2);
+    color:var(--paper);
+    padding:18px 0;
+    border-bottom:1px solid rgba(242,183,5,0.2);
+  }
+  .kw-selector .wrap{display:flex; align-items:center; gap:18px; flex-wrap:wrap;}
+  .kw-selector .kw-label{font-size:13.5px; font-weight:700; color:rgba(250,247,240,0.8); white-space:nowrap;}
+  .kw-buttons{display:flex; gap:8px; flex-wrap:wrap;}
+  .kw-btn{
+    font-family:'JetBrains Mono', monospace; font-size:13.5px; font-weight:700;
+    background:transparent; color:var(--paper);
+    border:1px solid rgba(250,247,240,0.35); border-radius:999px;
+    padding:8px 18px; cursor:pointer; transition: all .2s;
+  }
+  .kw-btn:hover{border-color:var(--marigold);}
+  .kw-btn.active{background:var(--marigold); color:var(--ink-night); border-color:var(--marigold);}
+
+  /* floating live power widget */
+  .live-widget{
+    position:fixed; top:86px; left:18px; z-index:40;
+    width:198px;
+    background: rgba(18,32,61,0.92);
+    border:1px solid rgba(242,183,5,0.35);
+    border-radius:16px;
+    padding:16px 18px;
+    backdrop-filter: blur(6px);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+    opacity:0; transform: translateY(-8px);
+    transition: opacity .4s ease, transform .4s ease;
+    pointer-events:none;
+  }
+  .live-widget.active{opacity:1; transform:translateY(0); pointer-events:auto;}
+  .live-widget-close{
+    position:absolute; top:9px; right:10px;
+    background:none; border:none; color:rgba(250,247,240,0.55);
+    font-size:12px; line-height:1; cursor:pointer; padding:4px;
+  }
+  .live-widget-close:hover{color:var(--marigold);}
+  .live-widget-head{display:flex; align-items:center; gap:8px; margin-bottom:12px;}
+  .live-panel-icon{
+    width:26px; height:18px; border-radius:2px;
+    background: linear-gradient(135deg, #2a4a82, #12203D);
+    border:1px solid rgba(242,183,5,0.5);
+    position:relative; flex-shrink:0;
+    animation: panelGlint 3s ease-in-out infinite;
+  }
+  @keyframes panelGlint{
+    0%,100%{ box-shadow: 0 0 0 rgba(242,183,5,0); }
+    50%{ box-shadow: 0 0 10px 2px rgba(242,183,5,0.5); }
+  }
+  .live-widget-title{font-size:11px; letter-spacing:0.06em; text-transform:uppercase; color:rgba(250,247,240,0.65); font-weight:700;}
+  .power-box{
+    background: rgba(250,247,240,0.95);
+    border-radius:10px; padding:10px 12px; margin-bottom:10px;
+    text-align:center;
+    animation: powerGlow 2.4s ease-in-out infinite;
+  }
+  @keyframes powerGlow{
+    0%,100%{ box-shadow: 0 0 8px 1px rgba(250,247,240,0.35); }
+    50%{ box-shadow: 0 0 18px 5px rgba(250,247,240,0.7); }
+  }
+  .power-box .p-label{font-size:10px; letter-spacing:0.05em; text-transform:uppercase; color:var(--ink-soft); font-weight:700; margin-bottom:3px;}
+  .power-box .p-value{font-family:'JetBrains Mono', monospace; font-size:20px; font-weight:700; color:var(--ink-night);}
+  .power-box.money .p-value{color:var(--leaf);}
+  .live-widget-note{font-size:10.5px; color:rgba(250,247,240,0.5); text-align:center; line-height:1.3;}
+
+  @media (max-width:760px){
+    .live-widget{ width:150px; padding:12px 14px; top:78px; left:12px; }
+    .power-box .p-value{font-size:16px;}
+  }
+
+  /* steps */
+  .steps{background:var(--ink-night); color:var(--paper);}
+  .steps .section-head p{color:rgba(250,247,240,0.7);}
+  .steps .section-head .eyebrow-light{color:var(--marigold-soft);}
+  .step-list{display:flex; flex-direction:column; border-top:1px solid rgba(250,247,240,0.15);}
+  .step{
+    display:grid; grid-template-columns:80px 1fr; gap:20px;
+    padding:26px 0; border-bottom:1px solid rgba(250,247,240,0.15);
+    align-items:baseline;
+  }
+  .step .step-num{font-family:'Fraunces',serif; font-size:34px; color:var(--marigold); font-weight:500;}
+  .step h3{margin:0 0 6px; font-size:19px; font-weight:600;}
+  .step p{margin:0; color:rgba(250,247,240,0.68); font-size:14.5px; max-width:60ch;}
+
+  /* calculator */
+  .calc{
+    background:var(--paper-2); border:1px solid var(--line); border-radius:20px;
+    padding:40px; display:grid; grid-template-columns:1fr 1fr; gap:40px;
+  }
+  .calc-input label{display:block; font-size:13px; font-weight:700; color:var(--ink-soft); margin-bottom:10px; letter-spacing:0.02em;}
+  .calc-input input[type=range]{width:100%; accent-color:var(--rust);}
+  .calc-amount{font-family:'JetBrains Mono',monospace; font-size:30px; font-weight:700; color:var(--ink); margin-top:14px;}
+  .calc-results{display:flex; flex-direction:column; gap:16px;}
+  .calc-result-row{display:flex; justify-content:space-between; align-items:baseline; padding-bottom:14px; border-bottom:1px solid var(--line);}
+  .calc-result-row:last-child{border-bottom:none;}
+  .calc-result-row .rlabel{font-size:14px; color:var(--ink-soft);}
+  .calc-result-row .rvalue{font-family:'JetBrains Mono',monospace; font-size:19px; font-weight:700; color:var(--leaf);}
+  .calc-note{font-size:12px; color:var(--ink-soft); margin-top:6px;}
+
+  /* contact */
+  .contact{background:var(--rust); color:var(--paper); text-align:center;}
+  .contact h2{font-size:clamp(26px,3.6vw,40px); margin:0 0 16px;}
+  .contact p{color:rgba(250,247,240,0.85); max-width:50ch; margin:0 auto 34px;}
+  .contact .btn-primary{background:var(--paper); color:var(--rust);}
+  .contact .btn-primary:hover{background:var(--marigold-soft); color:var(--ink-night);}
+
+  footer{background:var(--ink-night-2); color:rgba(250,247,240,0.55); font-size:13px; padding:32px 0;}
+  footer .wrap{display:flex; flex-wrap:wrap; justify-content:space-between; gap:12px;}
+  .todo{color:var(--marigold-soft);}
+
+  @media (max-width:760px){
+    nav .links{display:none;}
+    .why-grid{grid-template-columns:1fr;}
+    .calc{grid-template-columns:1fr;}
+    .step{grid-template-columns:56px 1fr;}
+    .step .step-num{font-size:26px;}
+  }
+</style>
+</head>
+<body>
+
+<div id="welcomeOverlay" class="welcome-overlay">
+  <div class="welcome-rays"></div>
+  <div class="welcome-sun"></div>
+  <div class="welcome-panels">
+    <div class="panel-row">
+      <div class="panel-cell"></div><div class="panel-cell"></div><div class="panel-cell"></div>
+      <div class="panel-cell"></div><div class="panel-cell"></div><div class="panel-cell"></div>
+    </div>
+  </div>
+  <div class="welcome-text">
+    <div class="welcome-brand">नमस्ते, आपका स्वागत है प्रतिभा सूर्या कनेक्ट में</div>
+  </div>
+</div>
+
+<nav>
+  <div class="wrap">
+    <div class="brand"><span class="brand-mark"></span>Pratibha Surya Connect</div>
+    <div class="links">
+      <a href="#contact">For more details, message us on WhatsApp</a>
+    </div>
+    <a class="nav-cta" href="#contact">Get a Free Quote</a>
+  </div>
+</nav>
+
+<div class="kw-selector">
+  <div class="wrap">
+    <span class="kw-label">How much solar did you install? Select to see live generation:</span>
+    <div class="kw-buttons" id="kwButtons">
+      <button class="kw-btn" data-kw="1">1 kW</button>
+      <button class="kw-btn" data-kw="2">2 kW</button>
+      <button class="kw-btn" data-kw="3">3 kW</button>
+      <button class="kw-btn" data-kw="4">4 kW</button>
+      <button class="kw-btn" data-kw="5">5 kW</button>
+    </div>
+  </div>
+</div>
+
+<div class="live-widget" id="liveWidget">
+  <button class="live-widget-close" id="liveWidgetClose" aria-label="Close">✕</button>
+  <div class="live-widget-head">
+    <div class="live-panel-icon"></div>
+    <span class="live-widget-title">Live from your panel</span>
+  </div>
+  <div class="power-box">
+    <div class="p-label">Generating now</div>
+    <div class="p-value" id="liveWatts">0 W</div>
+  </div>
+  <div class="power-box money">
+    <div class="p-label">Saved today</div>
+    <div class="p-value" id="liveSavings">₹0</div>
+  </div>
+  <div class="live-widget-note">Illustrative simulation based on your selected system size</div>
+</div>
+
+<header class="hero">
+  <div class="rays"></div>
+  <div class="wrap">
+    <span class="eyebrow">Serving homes &amp; farms across India</span>
+    <h1>Cut your electricity bill to <em>near zero</em> — with panels that pay for themselves.</h1>
+    <p class="lede">We help Indian households, shops and farmers switch to rooftop solar under the PM Surya Ghar Muft Bijli Yojana — free site survey, subsidy paperwork, and installation handled end to end.</p>
+    <div class="hero-cta-row">
+      <a class="btn btn-primary" href="#contact">Chat on WhatsApp</a>
+      <a class="btn btn-ghost" href="#calculator">See my savings</a>
+    </div>
+    <div class="meter">
+      <span class="label">Estimated saved by Indian homes on solar, right now</span>
+      <span class="value mono" id="counter">₹0</span>
+      <span class="sub">counting since you opened this page — illustrative estimate</span>
+    </div>
+  </div>
+</header>
+
+<section id="why">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow-light">Why Now</span>
+      <h2>The subsidy makes this the cheapest solar will ever be</h2>
+      <p>The Indian government is actively paying people to install rooftop solar. Waiting only means paying full price later.</p>
+    </div>
+    <div class="why-grid">
+      <div class="why-card">
+        <div class="num">01</div>
+        <h3>Government subsidy</h3>
+        <p>Up to ₹78,000 back under PM Surya Ghar for a typical home rooftop system — reduces your upfront cost directly.</p>
+      </div>
+      <div class="why-card">
+        <div class="num">02</div>
+        <h3>Free power, most months</h3>
+        <p>Many homes cover their entire monthly usage from sunlight alone, cutting the bill to near zero for years.</p>
+      </div>
+      <div class="why-card">
+        <div class="num">03</div>
+        <h3>No stock, no showroom</h3>
+        <p>We connect you straight to certified installers and handle the subsidy paperwork — one contact for the whole process.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="steps" id="process">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow-light">How It Works</span>
+      <h2>Five steps from enquiry to lower bills</h2>
+      <p>No pressure, no store visit required — everything starts on WhatsApp.</p>
+    </div>
+    <div class="step-list">
+      <div class="step"><span class="step-num mono">01</span><div><h3>Enquire</h3><p>Message your average monthly bill and pin location — takes under a minute.</p></div></div>
+      <div class="step"><span class="step-num mono">02</span><div><h3>Free site survey</h3><p>We arrange a no-cost visit to check your roof space and sunlight exposure.</p></div></div>
+      <div class="step"><span class="step-num mono">03</span><div><h3>Subsidy paperwork</h3><p>We handle your PM Surya Ghar application so the subsidy is applied correctly.</p></div></div>
+      <div class="step"><span class="step-num mono">04</span><div><h3>Installation</h3><p>A certified installer fits your system, typically within days of approval.</p></div></div>
+      <div class="step"><span class="step-num mono">05</span><div><h3>Start saving</h3><p>Your meter starts running down. Most homes see the difference from the first bill.</p></div></div>
+    </div>
+  </div>
+</section>
+
+<section id="pricing">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow-light">Pricing</span>
+      <h2>Current rate list</h2>
+      <p>Straight from our supplier's latest price list — subsidy already shown per system. Final price confirmed free after your site survey.</p>
+    </div>
+    <h3 class="price-table-heading">1. On-Grid Rate List</h3>
+    <div class="table-scroll">
+      <table class="price-table" id="onGridTable"></table>
+    </div>
+
+    <h3 class="price-table-heading" style="margin-top:44px;">2. Hybrid Rate List</h3>
+    <p class="table-sub">Without battery</p>
+    <div class="table-scroll">
+      <table class="price-table" id="hybridNoBatteryTable"></table>
+    </div>
+    <p class="table-sub" style="margin-top:26px;">With battery (3 kW configurations)</p>
+    <div class="table-scroll">
+      <table class="price-table" id="hybridWithBatteryTable"></table>
+    </div>
+
+    <p class="pricing-footnote">Prices include central subsidy where applicable. Battery configurations vary by voltage and warranty as shown. Ask us to confirm the latest rates before booking, as supplier pricing can change.</p>
+  </div>
+</section>
+
+<section id="calculator">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow-light">Savings Calculator</span>
+      <h2>See what solar could save you</h2>
+      <p>Drag the slider to your average monthly electricity bill for a rough estimate. An installer will confirm exact numbers after your free site survey.</p>
+    </div>
+    <div class="calc">
+      <div class="calc-input">
+        <label for="billRange">Average monthly electricity bill</label>
+        <input type="range" id="billRange" min="500" max="15000" step="100" value="3000">
+        <div class="calc-amount">₹<span id="billValue">3,000</span> / month</div>
+      </div>
+      <div class="calc-results">
+        <div class="calc-result-row"><span class="rlabel">Suggested system size</span><span class="rvalue mono" id="sysSize">2.0 kW</span></div>
+        <div class="calc-result-row"><span class="rlabel">Estimated subsidy</span><span class="rvalue mono" id="subsidy">₹60,000</span></div>
+        <div class="calc-result-row"><span class="rlabel">Estimated monthly saving</span><span class="rvalue mono" id="monthlySave">₹2,700</span></div>
+        <div class="calc-result-row"><span class="rlabel">Rough payback period</span><span class="rvalue mono" id="payback">~4.5 yrs</span></div>
+        <p class="calc-note">Illustrative only, based on typical rooftop solar assumptions in India. Actual figures depend on your roof, location and usage — confirmed free during the site survey.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="contact" id="contact">
+  <div class="wrap">
+    <h2>Ready to see your roof's potential?</h2>
+    <p>Send your average bill and city on WhatsApp — we'll reply with next steps and book your free site survey.</p>
+    <a class="btn btn-primary" id="waBtn" href="#" target="_blank" rel="noopener">Message us on WhatsApp →</a>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <span>© 2026 Pratibha Surya Connect — rooftop solar made simple.</span>
+    <span class="todo">Replace phone number, city and brand name — see notes below.</span>
+  </div>
+</footer>
+
+<script>
+  // Live power generation + savings simulator, driven by the kW the visitor selects
+  (function(){
+    var buttons = document.querySelectorAll('.kw-btn');
+    var widget = document.getElementById('liveWidget');
+    var closeBtn = document.getElementById('liveWidgetClose');
+    var wattsEl = document.getElementById('liveWatts');
+    var savingsEl = document.getElementById('liveSavings');
+    var simInterval = null;
+    var factor = 0;
+    var targetFactor = 0.7;
+    var savings = 0;
+    var TARIFF_PER_UNIT = 8; // ₹ per unit (kWh), illustrative
+
+    function clamp(v, min, max){ return Math.max(min, Math.min(max, v)); }
+
+    function startSim(kw){
+      if(simInterval) clearInterval(simInterval);
+      var capacityW = kw * 1000;
+      factor = 0;
+      targetFactor = 0.6 + Math.random()*0.25;
+      savings = 0;
+      wattsEl.textContent = '0 W';
+      savingsEl.textContent = '₹0';
+
+      function tick(){
+        // ramp up smoothly from zero toward a natural operating range, with light flicker
+        factor += (targetFactor - factor) * 0.25 + (Math.random() - 0.5) * 0.03;
+        factor = clamp(factor, 0, 0.95);
+        var watts = Math.round(capacityW * factor);
+        var unitsThisTick = (watts * 2) / 3600 / 1000; // 2-second tick, watts -> kWh
+        savings += unitsThisTick * TARIFF_PER_UNIT;
+
+        wattsEl.textContent = watts.toLocaleString('en-IN') + ' W';
+        savingsEl.textContent = '₹' + savings.toFixed(1);
+      }
+
+      tick();
+      simInterval = setInterval(tick, 2000);
+      widget.classList.add('active');
+    }
+
+    function stopSim(){
+      if(simInterval) clearInterval(simInterval);
+      simInterval = null;
+      widget.classList.remove('active');
+      buttons.forEach(function(b){ b.classList.remove('active'); });
+    }
+
+    buttons.forEach(function(btn){
+      btn.addEventListener('click', function(){
+        buttons.forEach(function(b){ b.classList.remove('active'); });
+        btn.classList.add('active');
+        startSim(parseInt(btn.getAttribute('data-kw'), 10));
+      });
+    });
+
+    closeBtn.addEventListener('click', stopSim);
+  })();
+</script>
+
+<script>
+  // Welcome sunrise animation — plays once on load, then reveals the site
+  (function(){
+    var overlay = document.getElementById('welcomeOverlay');
+    document.body.style.overflow = 'hidden';
+    var hasSpoken = false;
+
+    function speakGreeting(){
+      if(hasSpoken) return;
+      if(!('speechSynthesis' in window)) return;
+      hasSpoken = true;
+      var utter = new SpeechSynthesisUtterance('नमस्ते, आपका स्वागत है प्रतिभा सूर्या कनेक्ट में');
+      utter.lang = 'hi-IN';
+      utter.rate = 0.92;
+      utter.pitch = 1;
+
+      function pickHindiVoice(){
+        var voices = window.speechSynthesis.getVoices();
+        var hindiVoice = voices.find(function(v){ return v.lang === 'hi-IN'; }) ||
+                          voices.find(function(v){ return v.lang && v.lang.indexOf('hi') === 0; });
+        if(hindiVoice) utter.voice = hindiVoice;
+        window.speechSynthesis.speak(utter);
+      }
+
+      if(window.speechSynthesis.getVoices().length){
+        pickHindiVoice();
+      } else {
+        window.speechSynthesis.onvoiceschanged = pickHindiVoice;
+      }
+    }
+
+    function reveal(){
+      overlay.classList.add('hide');
+      document.body.style.overflow = '';
+    }
+
+    // Try to speak immediately; some browsers require a user gesture first,
+    // so also speak on the first click anywhere if autoplay was blocked.
+    speakGreeting();
+    document.addEventListener('click', speakGreeting, { once: true });
+
+    var autoTimer = setTimeout(reveal, 3400);
+    overlay.addEventListener('click', function(){
+      clearTimeout(autoTimer);
+      reveal();
+    });
+  })();
+</script>
+
+<script>
+  // ============================================================
+  // PRICE LIST — EDIT THIS SECTION WHEN MARKET PRICES CHANGE
+  // Just update the numbers below (in rupees, no commas needed).
+  // The tables on the page redraw themselves automatically.
+  // ============================================================
+  var PRICE_DATA = {
+
+    onGrid: [
+      { kw: 1, cost: 60000,  subsidy: 45000  },
+      { kw: 2, cost: 115000, subsidy: 90000  },
+      { kw: 3, cost: 175000, subsidy: 108000 },
+      { kw: 4, cost: 220000, subsidy: 108000 },
+      { kw: 5, cost: 270000, subsidy: 108000 }
+    ],
+
+    hybridNoBattery: [
+      { kw: 2, cost: 150000, subsidy: 90000  },
+      { kw: 3, cost: 205000, subsidy: 108000 }
+    ],
+
+    hybridWithBattery: [
+      { kw: 3, config: "Panel: Adani / Waaree / Luminous · Inverter: Sukam", battery: "Not specified", cost: 210000, subsidy: 108000 },
+      { kw: 3, config: "Panel: UTL · Inverter: UTL · 24V system", battery: "2 x 150Ah, 5-yr warranty", cost: 215000, subsidy: 108000 },
+      { kw: 3, config: "Panel: Adani / Waaree / Luminous · Inverter: Sukam · 24V system", battery: "2 x Luminous 150Ah, 5-yr warranty", cost: 225000, subsidy: 108000 },
+      { kw: 3, config: "Panel: Adani / Waaree / Luminous · Inverter: Sukam · 48V system", battery: "4 x Luminous 150Ah, 5-yr warranty", cost: 255000, subsidy: 108000 }
+    ]
+  };
+  // ============================================================
+  // END OF EDITABLE PRICE LIST
+  // ============================================================
+
+  function inr(n){ return '₹' + n.toLocaleString('en-IN'); }
+
+  function renderSimpleTable(tableId, rows){
+    var table = document.getElementById(tableId);
+    var html = '<tr><th>System Size</th><th class="num">Total Cost</th><th class="num">Subsidy</th><th class="num">Net Price</th></tr>';
+    rows.forEach(function(r){
+      var net = r.cost - r.subsidy;
+      html += '<tr><td>' + r.kw + ' kW</td><td class="num">' + inr(r.cost) + '</td><td class="num">' + inr(r.subsidy) + '</td><td class="net">' + inr(net) + '</td></tr>';
+    });
+    table.innerHTML = html;
+  }
+
+  function renderBatteryTable(tableId, rows){
+    var table = document.getElementById(tableId);
+    var html = '<tr><th>Size</th><th>Panel &amp; Inverter</th><th>Battery</th><th class="num">Total Cost</th><th class="num">Subsidy</th><th class="num">Net Price</th></tr>';
+    rows.forEach(function(r){
+      var net = r.cost - r.subsidy;
+      html += '<tr><td>' + r.kw + ' kW</td><td class="config">' + r.config + '</td><td class="config">' + r.battery + '</td><td class="num">' + inr(r.cost) + '</td><td class="num">' + inr(r.subsidy) + '</td><td class="net">' + inr(net) + '</td></tr>';
+    });
+    table.innerHTML = html;
+  }
+
+  renderSimpleTable('onGridTable', PRICE_DATA.onGrid);
+  renderSimpleTable('hybridNoBatteryTable', PRICE_DATA.hybridNoBattery);
+  renderBatteryTable('hybridWithBatteryTable', PRICE_DATA.hybridWithBattery);
+</script>
+
+<script>
+  // Live "savings counter" — illustrative, ticks up while the page is open
+  (function(){
+    var counterEl = document.getElementById('counter');
+    var value = 184320; // starting illustrative figure
+    setInterval(function(){
+      value += Math.floor(Math.random()*40) + 10;
+      counterEl.textContent = '₹' + value.toLocaleString('en-IN');
+    }, 900);
+  })();
+
+  // Savings calculator
+  var billRange = document.getElementById('billRange');
+  var billValue = document.getElementById('billValue');
+  var sysSize = document.getElementById('sysSize');
+  var subsidy = document.getElementById('subsidy');
+  var monthlySave = document.getElementById('monthlySave');
+  var payback = document.getElementById('payback');
+  var waBtn = document.getElementById('waBtn');
+
+  // TODO: replace with your real WhatsApp number in international format, no + or spaces
+  var WHATSAPP_NUMBER = "919415358888";
+
+  function formatINR(n){
+    return '₹' + Math.round(n).toLocaleString('en-IN');
+  }
+
+  function updateCalc(){
+    var bill = parseInt(billRange.value, 10);
+    billValue.textContent = bill.toLocaleString('en-IN');
+
+    // Assumptions based on 2026 India market data:
+    // ~1 kW covers roughly ₹900-1000 of monthly bill; system cost ~₹65,000/kW before subsidy
+    // PM Surya Ghar subsidy: ₹30,000/kW for first 2kW, ₹18,000/kW for the 3rd kW, capped at ₹78,000 total
+    var kw = Math.max(1, Math.round((bill / 950) * 2) / 2); // nearest 0.5 kW
+    var subsidyAmt = Math.min(kw, 2) * 30000 + Math.max(0, Math.min(kw, 3) - 2) * 18000;
+    subsidyAmt = Math.min(subsidyAmt, 78000);
+    var save = Math.round(bill * 0.85);
+    var systemCost = kw * 65000;
+    var netCost = Math.max(systemCost - subsidyAmt, 15000);
+    var paybackYears = (netCost / (save * 12)).toFixed(1);
+
+    sysSize.textContent = kw.toFixed(1) + ' kW';
+    subsidy.textContent = formatINR(subsidyAmt);
+    monthlySave.textContent = formatINR(save);
+    payback.textContent = '~' + paybackYears + ' yrs';
+
+    var msg = "Hi, I'm interested in rooftop solar. My average monthly bill is around ₹" + bill.toLocaleString('en-IN') + ". Can you share next steps?";
+    waBtn.href = "https://wa.me/" + WHATSAPP_NUMBER + "?text=" + encodeURIComponent(msg);
+  }
+
+  billRange.addEventListener('input', updateCalc);
+  updateCalc();
+</script>
+
+</body>
+</html>
